@@ -2,13 +2,15 @@
 ini_set('display_errors', 0);
 error_reporting(0);
 
-$dataDir = getenv('RAILWAY_VOLUME_MOUNT_PATH') ?: __DIR__ . '/..';
+// Always use project root for storage — Railway ephemeral FS is fine for SQLite
+// If you add a Railway Volume later, set RAILWAY_VOLUME_MOUNT_PATH env var
+$root = getenv('RAILWAY_VOLUME_MOUNT_PATH') ?: dirname(__DIR__);
 
-define('DB_PATH',       $dataDir . '/database/portfolio.db');
-define('UPLOAD_POSTS',  $dataDir . '/uploads/posts/');
-define('UPLOAD_AVATAR', $dataDir . '/uploads/avatar/');
-define('UPLOAD_PROJ',   $dataDir . '/uploads/projects/');
-define('JWT_SECRET',    getenv('JWT_SECRET') ?: 'portfolio_jwt_2024_changeme');
+define('DB_PATH',       $root . '/database/portfolio.db');
+define('UPLOAD_POSTS',  $root . '/uploads/posts/');
+define('UPLOAD_AVATAR', $root . '/uploads/avatar/');
+define('UPLOAD_PROJ',   $root . '/uploads/projects/');
+define('JWT_SECRET',    getenv('JWT_SECRET') ?: 'portfolio_jwt_secret_2024');
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH');
@@ -21,16 +23,28 @@ function getDB() {
     static $db = null;
     if ($db !== null) return $db;
 
-    foreach ([DB_PATH, UPLOAD_POSTS, UPLOAD_AVATAR, UPLOAD_PROJ] as $path) {
-        $dir = is_dir($path) ? $path : dirname($path);
-        if (!is_dir($dir)) mkdir($dir, 0777, true);
-    }
+    try {
+        // Ensure all directories exist
+        $dirs = [dirname(DB_PATH), UPLOAD_POSTS, UPLOAD_AVATAR, UPLOAD_PROJ];
+        foreach ($dirs as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+        }
 
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $db->exec('PRAGMA journal_mode=WAL');
-    initDB($db);
-    return $db;
+        $db = new PDO('sqlite:' . DB_PATH);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $db->exec('PRAGMA journal_mode=WAL');
+        $db->exec('PRAGMA foreign_keys=ON');
+        initDB($db);
+        return $db;
+    } catch (Throwable $e) {
+        // Return a clean JSON error instead of blank response
+        http_response_code(500);
+        echo json_encode(['error' => 'Database unavailable: ' . $e->getMessage()]);
+        exit();
+    }
 }
 
 function initDB($db) {
@@ -110,13 +124,16 @@ function jsonResponse($data, $code = 200) {
     echo json_encode($data);
     exit();
 }
+
 function errorResponse($msg, $code = 400) {
-    jsonResponse(['error' => $msg], $code);
+    http_response_code($code);
+    echo json_encode(['error' => $msg]);
+    exit();
 }
 
 function generateToken($id) {
-    $h = base64_encode(json_encode(['alg'=>'HS256','typ'=>'JWT']));
-    $p = base64_encode(json_encode(['sub'=>$id,'iat'=>time(),'exp'=>time()+86400]));
+    $h = base64_encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
+    $p = base64_encode(json_encode(['sub' => $id, 'iat' => time(), 'exp' => time() + 86400]));
     $s = base64_encode(hash_hmac('sha256', "$h.$p", JWT_SECRET, true));
     return "$h.$p.$s";
 }
@@ -128,14 +145,16 @@ function verifyToken($token) {
     $expected = base64_encode(hash_hmac('sha256', "$h.$p", JWT_SECRET, true));
     if (!hash_equals($expected, $s)) return false;
     $data = json_decode(base64_decode($p), true);
-    if ($data['exp'] < time()) return false;
+    if (!$data || $data['exp'] < time()) return false;
     return $data;
 }
 
 function requireAuth() {
     $headers = getallheaders();
     $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-    if (!$auth || !str_starts_with($auth, 'Bearer ')) errorResponse('Unauthorized', 401);
+    if (!$auth || !str_starts_with($auth, 'Bearer ')) {
+        errorResponse('Unauthorized', 401);
+    }
     $data = verifyToken(substr($auth, 7));
     if (!$data) errorResponse('Invalid or expired token', 401);
     return $data;
@@ -144,10 +163,10 @@ function requireAuth() {
 function saveUpload($file, $destDir, $prefix = 'file') {
     if (!$file || $file['error'] !== UPLOAD_ERR_OK) return null;
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, ['jpg','jpeg','png','webp','gif'])) return null;
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) return null;
     if ($file['size'] > 8 * 1024 * 1024) return null;
     if (!is_dir($destDir)) mkdir($destDir, 0777, true);
-    $name = $prefix . '_' . time() . '_' . rand(100,999) . '.' . $ext;
+    $name = $prefix . '_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
     if (!move_uploaded_file($file['tmp_name'], $destDir . $name)) return null;
     return $name;
 }

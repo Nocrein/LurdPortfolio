@@ -2,6 +2,9 @@
 ini_set('display_errors', 0); error_reporting(0);
 require_once 'config.php';
 
+try {
+
+
 $db     = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -43,3 +46,7 @@ if ($method === 'DELETE') {
 }
 
 errorResponse('Method not allowed', 405);
+
+} catch (Throwable $e) {
+    errorResponse('Server error: ' . $e->getMessage(), 500);
+}

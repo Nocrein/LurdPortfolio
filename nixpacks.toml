@@ -8,4 +8,4 @@ cmds = [
 ]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t . router.php"
+cmd = "mkdir -p database uploads/posts uploads/avatar uploads/projects && chmod -R 777 database uploads && php -S 0.0.0.0:$PORT -t . router.php"
