@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin.css"/>
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-dot-sm"></div>
+      <span>Portfolio</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-view="feed"     onclick="sw('feed',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Feed
+      </a>
+      <a class="nav-item" data-view="projects" onclick="sw('projects',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Projects
+      </a>
+      <a class="nav-item" data-view="skills"   onclick="sw('skills',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Skills
+      </a>
+      <a class="nav-item" data-view="profile"  onclick="sw('profile',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile
+      </a>
+      <a class="nav-item" data-view="messages" onclick="sw('messages',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Messages
+        <span class="badge" id="msgBadge" style="display:none"></span>
+      </a>
+      <a class="nav-item" data-view="settings" onclick="sw('settings',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <span id="adminEmailDisp" class="admin-email-disp"></span>
+      <button onclick="logout()" class="logout-btn">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-hdr">
+      <button class="burger" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <h2 id="viewTitle">Feed</h2>
+      <a href="/" target="_blank" class="site-link">View Site ↗</a>
+    </header>
+
+    <!-- FEED -->
+    <div class="view active" id="view-feed">
+      <div class="view-top">
+        <div class="post-composer">
+          <textarea id="composerText" placeholder="What's on your mind? Share an update…" rows="3"></textarea>
+          <div class="composer-footer">
+            <label class="attach-btn">
+              <input type="file" id="composerImg" accept="image/*" onchange="previewComposer(this)" style="display:none">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Photo
+            </label>
+            <img id="composerPreview" src="" style="display:none;height:40px;border-radius:4px;object-fit:cover;width:60px;">
+            <button class="btn-post" onclick="submitPost()">Post</button>
+          </div>
+        </div>
+      </div>
+      <div class="admin-feed" id="adminFeed">
+        <div class="loading"><div class="spin"></div></div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="view" id="view-projects">
+      <div class="view-top">
+        <button class="btn-add" onclick="openProjModal()">+ Add Project</button>
+      </div>
+      <div class="admin-proj-grid" id="adminProjGrid">
+        <div class="loading"><div class="spin"></div></div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="view" id="view-skills">
+      <div class="view-top">
+        <form class="skill-add-form" onsubmit="addSkill(event)">
+          <input type="text"   id="skillName"  placeholder="Skill name (e.g. React)"  required>
+          <input type="text"   id="skillCat"   placeholder="Category (e.g. Frontend)" >
+          <input type="number" id="skillLevel" placeholder="Level 0-100" min="0" max="100" value="80">
+          <button type="submit" class="btn-add">Add Skill</button>
+        </form>
+      </div>
+      <div class="skills-admin-list" id="skillsAdminList">
+        <div class="loading"><div class="spin"></div></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="view" id="view-profile">
+      <div class="profile-edit-wrap">
+        <div class="avatar-section">
+          <div class="avatar-preview-wrap">
+            <img id="avatarPreviewImg" src="" style="display:none">
+            <div class="avatar-ph" id="avatarPh">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <label class="upload-avatar-btn">
+            <input type="file" id="avatarFile" accept="image/*" onchange="previewAvatar(this)" style="display:none">
+            Change Avatar
+          </label>
+        </div>
+        <form id="profileEditForm" onsubmit="saveProfile(event)" enctype="multipart/form-data">
+          <div class="form-row">
+            <div class="form-group"><label>Name</label><input type="text" id="pName" name="name" placeholder="Your Name"></div>
+            <div class="form-group"><label>Tagline</label><input type="text" id="pTagline" name="tagline" placeholder="Full-Stack Developer"></div>
+          </div>
+          <div class="form-group"><label>Bio</label><textarea id="pBio" name="bio" rows="4" placeholder="Tell visitors about yourself…"></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label>Location</label><input type="text" id="pLocation" name="location" placeholder="Manila, Philippines"></div>
+            <div class="form-group"><label>Resume URL</label><input type="url" id="pResume" name="resume_url" placeholder="https://…"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>GitHub URL</label><input type="url" id="pGithub" name="github" placeholder="https://github.com/…"></div>
+            <div class="form-group"><label>LinkedIn URL</label><input type="url" id="pLinkedin" name="linkedin" placeholder="https://linkedin.com/in/…"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Twitter/X URL</label><input type="url" id="pTwitter" name="twitter" placeholder="https://x.com/…"></div>
+            <div class="form-group"><label>Website URL</label><input type="url" id="pWebsite" name="website" placeholder="https://yoursite.com"></div>
+          </div>
+          <button type="submit" class="btn-save" id="profileSaveBtn">Save Profile</button>
+          <div class="form-feedback" id="profileFb"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="view" id="view-messages">
+      <div class="msg-list" id="msgList">
+        <div class="loading"><div class="spin"></div></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS (change email/password) -->
+    <div class="view" id="view-settings">
+      <div class="settings-wrap">
+        <h3>Change Credentials</h3>
+        <p class="settings-note">Update your login email or password. You must confirm your current password.</p>
+        <form id="credForm" onsubmit="saveCredentials(event)">
+          <div class="form-group">
+            <label>Current Password *</label>
+            <input type="password" name="current_password" required placeholder="Your current password">
+          </div>
+          <div class="form-group">
+            <label>New Email <span class="opt">(leave blank to keep current)</span></label>
+            <input type="email" name="email" id="credEmail" placeholder="new@email.com">
+          </div>
+          <div class="form-group">
+            <label>New Password <span class="opt">(leave blank to keep current)</span></label>
+            <input type="password" name="new_password" placeholder="Min. 6 characters">
+          </div>
+          <button type="submit" class="btn-save" id="credBtn">Update Credentials</button>
+          <div class="form-feedback" id="credFb"></div>
+        </form>
+        <div class="current-creds">
+          Current email: <strong id="currentEmailDisp"></strong>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PROJECT MODAL -->
+  <div class="modal-overlay" id="projModal">
+    <div class="modal">
+      <div class="modal-hdr">
+        <h3 id="projModalTitle">Add Project</h3>
+        <button class="modal-x" onclick="closeProjModal()">✕</button>
+      </div>
+      <form id="projForm" onsubmit="submitProject(event)">
+        <input type="hidden" id="projId">
+        <div class="upload-zone" onclick="document.getElementById('projImgFile').click()">
+          <input type="file" id="projImgFile" accept="image/*" onchange="previewProjImg(this)" style="display:none">
+          <div id="projImgPrompt" class="uz-prompt">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>Click to upload image</span>
+          </div>
+          <img id="projImgPreview" style="display:none;width:100%;height:160px;object-fit:cover;border-radius:6px;">
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Title *</label><input type="text" id="pjTitle" name="title" required></div>
+          <div class="form-group"><label>Featured</label>
+            <select id="pjFeatured" name="featured"><option value="0">No</option><option value="1">Yes</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea id="pjDesc" name="description" rows="3"></textarea></div>
+        <div class="form-group"><label>Tech Stack <span class="opt">(comma separated)</span></label><input type="text" id="pjTech" name="tech" placeholder="React, Node.js, PostgreSQL"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Live URL</label><input type="url" id="pjLive" name="live_url" placeholder="https://…"></div>
+          <div class="form-group"><label>GitHub URL</label><input type="url" id="pjGh" name="github_url" placeholder="https://github.com/…"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" onclick="closeProjModal()" class="btn-cancel">Cancel</button>
+          <button type="submit" class="btn-save" id="projSubmitBtn">Save</button>
+        </div>
+        <div class="form-feedback" id="projFb"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT POST MODAL -->
+  <div class="modal-overlay" id="editPostModal">
+    <div class="modal">
+      <div class="modal-hdr"><h3>Edit Post</h3><button class="modal-x" onclick="closeEditPost()">✕</button></div>
+      <input type="hidden" id="editPostId">
+      <div style="padding:0 24px 24px">
+        <div class="form-group"><label>Content</label><textarea id="editPostContent" rows="5"></textarea></div>
+        <div class="modal-actions">
+          <button onclick="closeEditPost()" class="btn-cancel">Cancel</button>
+          <button onclick="saveEditPost()" class="btn-save">Save</button>
+        </div>
+        <div class="form-feedback" id="editPostFb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM -->
+  <div class="modal-overlay" id="delModal">
+    <div class="modal small">
+      <div class="modal-hdr"><h3>Confirm Delete</h3><button class="modal-x" onclick="closeDelModal()">✕</button></div>
+      <p style="padding:16px 24px;color:var(--text2)">This action cannot be undone.</p>
+      <div class="modal-actions" style="padding:0 24px 24px">
+        <button onclick="closeDelModal()" class="btn-cancel">Cancel</button>
+        <button onclick="confirmDel()" class="btn-danger" id="delConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/assets/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin.css"/>
+</head>
+<body class="auth-page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-dot-lg"></div>
+        <h1>Admin</h1>
+        <p>Portfolio Dashboard</p>
+      </div>
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required placeholder="admin@portfolio.dev" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="pw-wrap">
+            <input type="password" name="password" required id="pwInput" autocomplete="current-password">
+            <button type="button" onclick="togglePw()" class="pw-eye">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-login" id="loginBtn"><span>Sign In</span></button>
+        <div class="auth-err" id="authErr"></div>
+      </form>
+      <a href="/" class="back-link">← Back to site</a>
+    </div>
+  </div>
+  <script>
+    if (localStorage.getItem('pf_token')) location.href = '/admin/dashboard.html';
+    async function doLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('authErr');
+      err.textContent = '';
+      btn.disabled = true;
+      btn.querySelector('span').textContent = 'Signing in…';
+      try {
+        const res = await fetch('/api/auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: e.target.email.value, password: e.target.password.value })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        localStorage.setItem('pf_token', data.token);
+        localStorage.setItem('pf_email', data.email);
+        location.href = '/admin/dashboard.html';
+      } catch (ex) {
+        err.textContent = ex.message;
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Sign In';
+      }
+    }
+    function togglePw() {
+      const i = document.getElementById('pwInput');
+      i.type = i.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+</body>
+</html>

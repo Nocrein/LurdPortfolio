@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <div class="nav-logo" onclick="scrollToTop()">
+        <span class="logo-dot"></span>
+        <span id="navName">Portfolio</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#feed"     onclick="smoothScroll('feed')">Feed</a></li>
+        <li><a href="#info"     onclick="smoothScroll('info')">Info</a></li>
+        <li><a href="#projects" onclick="smoothScroll('projects')">Projects</a></li>
+        <li><a href="#contact"  onclick="smoothScroll('contact')">Contact</a></li>
+        <li><a href="/admin/login.html" class="nav-admin-btn">Admin</a></li>
+      </ul>
+      <button class="nav-burger" id="navBurger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="hero-glow g1"></div>
+      <div class="hero-glow g2"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-avatar-wrap">
+        <img id="heroAvatar" src="" alt="Avatar" style="display:none">
+        <div class="hero-avatar-placeholder" id="heroAvatarPH">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+      </div>
+      <div class="hero-status"><span class="status-dot"></span> Open to opportunities</div>
+      <h1 id="heroName">Your Name</h1>
+      <p class="hero-tagline" id="heroTagline">Full-Stack Developer</p>
+      <p class="hero-bio" id="heroBio"></p>
+      <div class="hero-location" id="heroLocation" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="heroLocationText"></span>
+      </div>
+      <div class="hero-actions" id="heroActions">
+        <a href="#contact" onclick="smoothScroll('contact')" class="btn-primary">Get in Touch</a>
+        <a href="#projects" onclick="smoothScroll('projects')" class="btn-ghost">View Projects</a>
+      </div>
+      <div class="hero-socials" id="heroSocials"></div>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>scroll down</span>
+      <div class="scroll-line"></div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="content-wrap">
+
+      <!-- ── FEED ────────────────────────────── -->
+      <section class="section" id="feed">
+        <div class="section-label">
+          <span class="label-dot"></span> Latest Updates
+        </div>
+        <div class="feed" id="feedList">
+          <div class="feed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="load-more-wrap" id="feedMore" style="display:none">
+          <button class="btn-outline" onclick="loadMorePosts()">Load more</button>
+        </div>
+      </section>
+
+      <!-- ── INFO ────────────────────────────── -->
+      <section class="section" id="info">
+        <div class="section-label">
+          <span class="label-dot"></span> Skills & Info
+        </div>
+        <div class="skills-wrap" id="skillsWrap">
+          <div class="feed-loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- ── PROJECTS ─────────────────────────── -->
+      <section class="section" id="projects">
+        <div class="section-label">
+          <span class="label-dot"></span> Projects
+        </div>
+        <div class="projects-grid" id="projectsGrid">
+          <div class="feed-loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- ── CONTACT ──────────────────────────── -->
+      <section class="section" id="contact">
+        <div class="section-label">
+          <span class="label-dot"></span> Contact
+        </div>
+        <div class="contact-wrap">
+          <div class="contact-left">
+            <h2>Let's talk</h2>
+            <p>Have a project in mind, want to collaborate, or just want to say hi? Drop me a message.</p>
+            <div class="contact-socials" id="contactSocials"></div>
+          </div>
+          <form class="contact-form" id="contactForm" onsubmit="submitContact(event)">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" name="name" required placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" name="email" required placeholder="you@email.com">
+            </div>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea name="message" required rows="5" placeholder="What's on your mind?"></textarea>
+            </div>
+            <button type="submit" class="btn-primary full" id="contactBtn">
+              <span>Send Message</span>
+            </button>
+            <div class="form-feedback" id="contactFeedback"></div>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Built with ♥ — <span id="footerName">Portfolio</span> © <span id="footerYear"></span></p>
+  </footer>
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="mobileNav">
+    <a onclick="smoothScroll('feed');  closeMobileNav()">Feed</a>
+    <a onclick="smoothScroll('info');  closeMobileNav()">Info</a>
+    <a onclick="smoothScroll('projects'); closeMobileNav()">Projects</a>
+    <a onclick="smoothScroll('contact'); closeMobileNav()">Contact</a>
+    <a href="/admin/login.html">Admin →</a>
+  </div>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileNav()"></div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
