@@ -2,8 +2,8 @@
 ini_set('display_errors', 0);
 error_reporting(0);
 
-// Always use project root for storage — Railway ephemeral FS is fine for SQLite
-// If you add a Railway Volume later, set RAILWAY_VOLUME_MOUNT_PATH env var
+// __DIR__ = /path/to/portfolio/api
+// dirname(__DIR__) = /path/to/portfolio  (project root)
 $root = getenv('RAILWAY_VOLUME_MOUNT_PATH') ?: dirname(__DIR__);
 
 define('DB_PATH',       $root . '/database/portfolio.db');
@@ -22,27 +22,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit();
 function getDB() {
     static $db = null;
     if ($db !== null) return $db;
-
     try {
-        // Ensure all directories exist
         $dirs = [dirname(DB_PATH), UPLOAD_POSTS, UPLOAD_AVATAR, UPLOAD_PROJ];
         foreach ($dirs as $dir) {
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);
-            }
+            if (!is_dir($dir)) mkdir($dir, 0777, true);
         }
-
         $db = new PDO('sqlite:' . DB_PATH);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         $db->exec('PRAGMA journal_mode=WAL');
-        $db->exec('PRAGMA foreign_keys=ON');
         initDB($db);
         return $db;
     } catch (Throwable $e) {
-        // Return a clean JSON error instead of blank response
         http_response_code(500);
-        echo json_encode(['error' => 'Database unavailable: ' . $e->getMessage()]);
+        echo json_encode(['error' => 'DB init failed: ' . $e->getMessage(), 'root' => $root ?? 'unknown']);
         exit();
     }
 }
@@ -105,14 +98,12 @@ function initDB($db) {
         );
     ");
 
-    // Seed admin
     $row = $db->query("SELECT id FROM admin LIMIT 1")->fetch();
     if (!$row) {
         $db->prepare("INSERT INTO admin (email, password) VALUES (?, ?)")
            ->execute(['admin@portfolio.dev', password_hash('admin123', PASSWORD_BCRYPT)]);
     }
 
-    // Seed profile
     $row = $db->query("SELECT id FROM profile LIMIT 1")->fetch();
     if (!$row) {
         $db->exec("INSERT INTO profile (name, tagline, bio) VALUES ('Your Name', 'Full-Stack Developer', 'A passionate developer who loves building things.')");
@@ -152,9 +143,7 @@ function verifyToken($token) {
 function requireAuth() {
     $headers = getallheaders();
     $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-    if (!$auth || !str_starts_with($auth, 'Bearer ')) {
-        errorResponse('Unauthorized', 401);
-    }
+    if (!$auth || !str_starts_with($auth, 'Bearer ')) errorResponse('Unauthorized', 401);
     $data = verifyToken(substr($auth, 7));
     if (!$data) errorResponse('Invalid or expired token', 401);
     return $data;
